@@ -2,18 +2,18 @@ package com.platform.school;
 
 import com.platform.school.dto.SchoolResponse;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SchoolIntegrationTest {
 
@@ -21,12 +21,14 @@ public class SchoolIntegrationTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void test() throws Exception {
-        var response = restTemplate.getForEntity("/schools/{school-id}", SchoolResponse.class);
+    public void shouldGetSchoolById() {
+        var response = restTemplate.getForEntity("api/v1/schools/{school-id}", SchoolResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().name()).isEqualTo("СРЕДНЯЯ ШКОЛА №3 г. Иваново");
         assertThat(response.getBody().address()).isEqualTo("ул. Советская, 26");
+        assertThat(response.getBody().location().region()).isEqualTo("Брестская область");
+        assertThat(response.getBody().location().locality()).isEqualTo("г. Иваново");
         assertThat(response.getBody().phoneNumber()).isEqualTo("(01652) 9 50 82");
         assertThat(response.getBody().email()).isEqualTo("sch3@ivanovo.edu.by");
         assertThat(response.getBody().type()).isEqualTo("ГУО");
@@ -40,7 +42,7 @@ public class SchoolIntegrationTest {
         assertThat(response.getBody().extracurricularActivities().contains("факультатив по математике")).isEqualTo(true);
         assertThat(response.getBody().workTime().start()).isEqualTo(LocalTime.of(7, 0));
         assertThat(response.getBody().workTime().end()).isEqualTo(LocalTime.of(21, 0));
-        assertThat(response.getBody().workTime().start()).isEqualTo(LocalTime.of(8, 0));
-        assertThat(response.getBody().workTime().end()).isEqualTo(LocalTime.of(20, 0));
+        assertThat(response.getBody().schoolHours().start()).isEqualTo(LocalTime.of(8, 0));
+        assertThat(response.getBody().schoolHours().end()).isEqualTo(LocalTime.of(20, 0));
     }
 }

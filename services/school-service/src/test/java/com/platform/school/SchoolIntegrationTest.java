@@ -38,7 +38,7 @@ public class SchoolIntegrationTest {
         assertThat(response.getBody().teachersCount()).isEqualTo(60);
         assertThat(response.getBody().staffCount()).isEqualTo(90);
         assertThat(response.getBody().classroomCount()).isEqualTo(60);
-        assertThat(response.getBody().facilities().contains("библиотека")).isEqualTo(true);
+        assertThat(response.getBody().facilities().contains("Библиотека")).isEqualTo(true);
         assertThat(response.getBody().extracurricularActivities().contains("факультатив по математике")).isEqualTo(true);
         assertThat(response.getBody().workTime().start()).isEqualTo(LocalTime.of(7, 0));
         assertThat(response.getBody().workTime().end()).isEqualTo(LocalTime.of(21, 0));

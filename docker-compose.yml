@@ -1,0 +1,16 @@
+services:
+  postgres:
+    container_name: ms_postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PG_DATA: /var/lib/postgresql/data
+    volumes:
+      - postgres:/var/lib/postgres/data
+    restart: unless-stopped
+    ports:
+      - 5433:5432
+
+volumes:
+  postgres:

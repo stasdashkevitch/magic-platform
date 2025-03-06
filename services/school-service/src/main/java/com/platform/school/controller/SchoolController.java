@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/schools")
+@RequestMapping("/api/v1/schools")
 @RequiredArgsConstructor
 public class SchoolController {
 

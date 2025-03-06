@@ -86,7 +86,7 @@ public class SchoolControllerTest {
                 .andExpect(jsonPath("$.teachersCount").value(60))
                 .andExpect(jsonPath("$.staffCount").value(90))
                 .andExpect(jsonPath("$.classroomCount").value(60))
-                .andExpect(jsonPath("$.facilities", hasItem("библиотека")))
+                .andExpect(jsonPath("$.facilities", hasItem("Библиотека")))
                 .andExpect(jsonPath("$.extracurricularActivities", hasItem("факультатив по математике")))
                 .andExpect(jsonPath("$.workTime.start").value("07:00"))
                 .andExpect(jsonPath("$.workTime.end").value("21:00"))

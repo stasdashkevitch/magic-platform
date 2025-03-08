@@ -5,7 +5,8 @@ import java.util.List;
 public record SchoolResponse(
         Long id,
         String name,
-        LocationResponse location,
+        String region,
+        String locality,
         String address,
         String phoneNumber,
         String email,
@@ -17,8 +18,7 @@ public record SchoolResponse(
         Integer staffCount,
         Integer classroomCount,
         List<String> facilities,
-        List<String> extracurricularActivities,
-        TimeRangeDto workTime,
-        TimeRangeDto schoolHours
+        TimeRangeResponse workTime,
+        TimeRangeResponse schoolHours
 ) {
 }

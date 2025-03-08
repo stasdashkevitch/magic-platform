@@ -1,8 +1,7 @@
 package com.platform.school.controller;
 
-import com.platform.school.dto.LocationResponse;
 import com.platform.school.dto.SchoolResponse;
-import com.platform.school.dto.TimeRangeDto;
+import com.platform.school.dto.TimeRangeResponse;
 import com.platform.school.service.SchoolService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,16 +32,14 @@ public class SchoolControllerTest {
     private SchoolService schoolService;
 
     @Test
-    public void shouldReturnSchoolById() throws Exception {
-        given(schoolService.getSchool(anyLong())).willReturn(
+    public void shouldReturnJsonSchoolResponseById() throws Exception {
+
+        given(schoolService.getSchoolById(anyLong())).willReturn(
                 new SchoolResponse(
                         1L,
                         "СРЕДНЯЯ ШКОЛА №3 г. Иваново",
-                        new LocationResponse(
-                                1L,
-                               "Брестская область",
-                                "г. Иваново"
-                        ),
+                        "Брестская область",
+                        "г. Иваново",
                         "ул. Советская, 26",
                         "(01652) 9 50 82",
                         "sch3@ivanovo.edu.by",
@@ -54,12 +51,11 @@ public class SchoolControllerTest {
                         90,
                         60,
                         List.of("Библиотека"),
-                        List.of("факультатив по математике"),
-                        new TimeRangeDto(
+                        new TimeRangeResponse(
                                 LocalTime.of(7, 0),
                                 LocalTime.of(21, 0)
                         ),
-                        new TimeRangeDto(
+                        new TimeRangeResponse(
                                 LocalTime.of(8, 0),
                                 LocalTime.of(20, 0)
                         )
@@ -72,8 +68,8 @@ public class SchoolControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("СРЕДНЯЯ ШКОЛА №3 г. Иваново"))
-                .andExpect(jsonPath("$.location.region").value("Брестская область"))
-                .andExpect(jsonPath("$.location.locality").value("г. Иваново"))
+                .andExpect(jsonPath("$.region").value("Брестская область"))
+                .andExpect(jsonPath("$.locality").value("г. Иваново"))
                 .andExpect(jsonPath("$.address").value("ул. Советская, 26"))
                 .andExpect(jsonPath("$.phoneNumber").value("(01652) 9 50 82"))
                 .andExpect(jsonPath("$.email").value("sch3@ivanovo.edu.by"))
@@ -87,7 +83,6 @@ public class SchoolControllerTest {
                 .andExpect(jsonPath("$.staffCount").value(90))
                 .andExpect(jsonPath("$.classroomCount").value(60))
                 .andExpect(jsonPath("$.facilities", hasItem("Библиотека")))
-                .andExpect(jsonPath("$.extracurricularActivities", hasItem("факультатив по математике")))
                 .andExpect(jsonPath("$.workTime.start").value("07:00"))
                 .andExpect(jsonPath("$.workTime.end").value("21:00"))
                 .andExpect(jsonPath("$.schoolHours.start").value("08:00"))

@@ -27,8 +27,8 @@ public class SchoolIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().name()).isEqualTo("СРЕДНЯЯ ШКОЛА №3 г. Иваново");
         assertThat(response.getBody().address()).isEqualTo("ул. Советская, 26");
-        assertThat(response.getBody().location().region()).isEqualTo("Брестская область");
-        assertThat(response.getBody().location().locality()).isEqualTo("г. Иваново");
+        assertThat(response.getBody().region()).isEqualTo("Брестская область");
+        assertThat(response.getBody().locality()).isEqualTo("г. Иваново");
         assertThat(response.getBody().phoneNumber()).isEqualTo("(01652) 9 50 82");
         assertThat(response.getBody().email()).isEqualTo("sch3@ivanovo.edu.by");
         assertThat(response.getBody().type()).isEqualTo("ГУО");
@@ -39,7 +39,6 @@ public class SchoolIntegrationTest {
         assertThat(response.getBody().staffCount()).isEqualTo(90);
         assertThat(response.getBody().classroomCount()).isEqualTo(60);
         assertThat(response.getBody().facilities().contains("Библиотека")).isEqualTo(true);
-        assertThat(response.getBody().extracurricularActivities().contains("факультатив по математике")).isEqualTo(true);
         assertThat(response.getBody().workTime().start()).isEqualTo(LocalTime.of(7, 0));
         assertThat(response.getBody().workTime().end()).isEqualTo(LocalTime.of(21, 0));
         assertThat(response.getBody().schoolHours().start()).isEqualTo(LocalTime.of(8, 0));

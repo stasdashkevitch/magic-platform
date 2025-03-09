@@ -1,5 +1,6 @@
 package com.platform.school.service;
 
+import com.platform.school.dto.SchoolRequest;
 import com.platform.school.dto.SchoolResponse;
 import com.platform.school.exception.SchoolNotFoundException;
 import com.platform.school.mapper.SchoolMapper;
@@ -30,5 +31,16 @@ public class SchoolService {
 
         log.info("Successfully fetched school. ID: {}", id);
         return schoolResponse;
+    }
+
+    public SchoolResponse createSchool(SchoolRequest schoolRequest) {
+        log.info("Creating school: {}", schoolRequest);
+
+        var school = schoolMapper.schoolRequestToSchool(schoolRequest);
+        var savedSchool = schoolRepository.save(school);
+        var resultSchoolResponse = schoolMapper.schoolToSchoolResponse(savedSchool);
+
+        log.info("Successfully created school. ID: {}", school.getId());
+        return resultSchoolResponse;
     }
 }

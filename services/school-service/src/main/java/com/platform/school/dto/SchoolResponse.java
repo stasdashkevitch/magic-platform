@@ -18,7 +18,7 @@ public record SchoolResponse(
         Integer staffCount,
         Integer classroomCount,
         List<String> facilities,
-        TimeRangeResponse workTime,
-        TimeRangeResponse schoolHours
+        TimeRangeDto workTime,
+        TimeRangeDto schoolHours
 ) {
 }

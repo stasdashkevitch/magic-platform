@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,8 +31,7 @@ public class SchoolExceptionHandlerTest {
     SchoolService schoolService;
 
     @Test
-    public void shouldNotFoundSchoolById() throws Exception {
-
+    public void shouldThrowNotFoundSchoolById() throws Exception {
         given(schoolService.getSchoolById(anyLong())).willThrow(new SchoolNotFoundException("School not found. ID: " + SCHOOL_ID));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/schools/{school-id}", SCHOOL_ID))

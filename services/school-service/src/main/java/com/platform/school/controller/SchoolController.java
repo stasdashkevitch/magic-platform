@@ -1,14 +1,14 @@
 package com.platform.school.controller;
 
+import com.platform.school.dto.SchoolRequest;
 import com.platform.school.dto.SchoolResponse;
 import com.platform.school.service.SchoolService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -24,5 +24,13 @@ public class SchoolController {
     ) {
         log.info("Get school by id: {}", id);
         return ResponseEntity.ok(schoolService.getSchoolById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<SchoolResponse> createSchool(
+            @Valid @RequestBody SchoolRequest schoolRequest
+    ) {
+        log.info("Create school: {}", schoolRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(schoolService.createSchool(schoolRequest));
     }
 }

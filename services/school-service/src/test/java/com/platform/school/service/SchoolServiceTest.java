@@ -1,7 +1,8 @@
 package com.platform.school.service;
 
+import com.platform.school.dto.SchoolRequest;
 import com.platform.school.dto.SchoolResponse;
-import com.platform.school.dto.TimeRangeResponse;
+import com.platform.school.dto.TimeRangeDto;
 import com.platform.school.entity.School;
 import com.platform.school.entity.SchoolLocation;
 import com.platform.school.entity.TimeRange;
@@ -27,6 +28,7 @@ class SchoolServiceTest {
 
     private static School school;
     private static SchoolResponse schoolResponse;
+    private static SchoolRequest schoolRequest;
 
     @Mock
     private SchoolRepository schoolRepository;
@@ -88,19 +90,44 @@ class SchoolServiceTest {
                 90,
                 60,
                 List.of("Библиотека"),
-                new TimeRangeResponse(
+                new TimeRangeDto(
                         LocalTime.of(7, 0),
                         LocalTime.of(21, 0)
                 ),
-                new TimeRangeResponse(
+                new TimeRangeDto(
                         LocalTime.of(8, 0),
                         LocalTime.of(2, 0)
+                )
+        );
+
+        schoolRequest = new SchoolRequest(
+                "СРЕДНЯЯ ШКОЛА №3 г. Иваново",
+                "Брестская область",
+                "г. Иваново",
+                "ул. Советская, 26",
+                "(01652) 9 50 82",
+                "sch3@ivanovo.edu.by",
+                "ГУО",
+                1992,
+                1000,
+                9090,
+                60,
+                90,
+                60,
+                List.of("Библиотека"),
+                new TimeRangeDto(
+                        LocalTime.of(7, 0),
+                        LocalTime.of(21, 0)
+                ),
+                new TimeRangeDto(
+                        LocalTime.of(8, 0),
+                        LocalTime.of(20, 0)
                 )
         );
     }
 
     @Test
-    public void shouldReturnSchoolResponseById() throws Exception {
+    public void shouldReturnSchoolResponseById() {
         given(schoolRepository.findById(1L)).willReturn(Optional.of(school));
         given(schoolMapper.schoolToSchoolResponse(school)).willReturn(
             schoolResponse
@@ -109,6 +136,18 @@ class SchoolServiceTest {
         var resultSchoolResponse = schoolService.getSchoolById(1L);
 
         assertThat(schoolResponse).isNotNull();
+        assertThat(resultSchoolResponse).isEqualTo(schoolResponse);
+    }
+
+    @Test
+    public void shouldCreateSchoolAndReturnSchoolResponse() {
+        given(schoolMapper.schoolRequestToSchool(schoolRequest)).willReturn(school);
+        given(schoolRepository.save(school)).willReturn(school);
+        given(schoolMapper.schoolToSchoolResponse(school)).willReturn(schoolResponse);
+
+        var resultSchoolResponse = schoolService.createSchool(schoolRequest);
+
+        assertThat(resultSchoolResponse).isNotNull();
         assertThat(resultSchoolResponse).isEqualTo(schoolResponse);
     }
 }

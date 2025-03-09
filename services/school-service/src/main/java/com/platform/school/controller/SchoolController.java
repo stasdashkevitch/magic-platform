@@ -33,4 +33,12 @@ public class SchoolController {
         log.info("Create school: {}", schoolRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(schoolService.createSchool(schoolRequest));
     }
+
+    @DeleteMapping("/{school-id}")
+    public ResponseEntity<SchoolResponse> deleteSchoolById(
+            @PathVariable("school-id") Long id
+    ) {
+        log.info("Delete school by id: {}", id);
+        return ResponseEntity.ok(schoolService.deleteSchoolById(id));
+    }
 }

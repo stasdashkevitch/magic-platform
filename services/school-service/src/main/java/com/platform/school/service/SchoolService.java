@@ -7,7 +7,6 @@ import com.platform.school.mapper.SchoolMapper;
 import com.platform.school.repository.SchoolRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -41,6 +40,23 @@ public class SchoolService {
         var resultSchoolResponse = schoolMapper.schoolToSchoolResponse(savedSchool);
 
         log.info("Successfully created school. ID: {}", school.getId());
+        return resultSchoolResponse;
+    }
+
+    public SchoolResponse deleteSchoolById(Long Id) {
+        log.info("Deleting school by ID: {}", Id);
+
+        var school = schoolRepository.findById(Id).orElse(null);
+        if (school == null) {
+            log.error("School not found. ID: {}", Id);
+            throw new SchoolNotFoundException("School not found. ID: " + Id);
+        }
+
+        schoolRepository.deleteById(Id);
+
+        var resultSchoolResponse = schoolMapper.schoolToSchoolResponse(school);
+
+        log.info("Successfully deleted school. ID: {}", Id);
         return resultSchoolResponse;
     }
 }

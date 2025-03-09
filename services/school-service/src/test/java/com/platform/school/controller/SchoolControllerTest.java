@@ -30,6 +30,8 @@ import static org.mockito.BDDMockito.given;
 @WebMvcTest(SchoolController.class)
 public class SchoolControllerTest {
 
+    private final static String BASE_URL = "/api/v1/schools";
+
     private static SchoolResponse schoolResponse;
     private static SchoolRequest schoolRequest;
 
@@ -102,7 +104,7 @@ public class SchoolControllerTest {
         given(schoolService.getSchoolById(anyLong())).willReturn(schoolResponse);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/v1/schools/{school-id}", 1)
+                        .get(BASE_URL + "/{school-id}", 1)
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -135,11 +137,41 @@ public class SchoolControllerTest {
         given(schoolService.createSchool(any(SchoolRequest.class))).willReturn(schoolResponse);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/v1/schools")
+                MockMvcRequestBuilders.post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(schoolRequestJson)
                 )
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("СРЕДНЯЯ ШКОЛА №3 г. Иваново"))
+                .andExpect(jsonPath("$.region").value("Брестская область"))
+                .andExpect(jsonPath("$.locality").value("г. Иваново"))
+                .andExpect(jsonPath("$.address").value("ул. Советская, 26"))
+                .andExpect(jsonPath("$.phoneNumber").value("(01652) 9 50 82"))
+                .andExpect(jsonPath("$.email").value("sch3@ivanovo.edu.by"))
+                .andExpect(jsonPath("$.phoneNumber").value("(01652) 9 50 82"))
+                .andExpect(jsonPath("$.email").value("sch3@ivanovo.edu.by"))
+                .andExpect(jsonPath("$.type").value("ГУО"))
+                .andExpect(jsonPath("$.establishedYear").value(1992))
+                .andExpect(jsonPath("$.studentCapacity").value(1000))
+                .andExpect(jsonPath("$.studentCount").value(9090))
+                .andExpect(jsonPath("$.teachersCount").value(60))
+                .andExpect(jsonPath("$.staffCount").value(90))
+                .andExpect(jsonPath("$.classroomCount").value(60))
+                .andExpect(jsonPath("$.facilities", hasItem("Библиотека")))
+                .andExpect(jsonPath("$.workTime.start").value("07:00"))
+                .andExpect(jsonPath("$.workTime.end").value("21:00"))
+                .andExpect(jsonPath("$.schoolHours.start").value("08:00"))
+                .andExpect(jsonPath("$.schoolHours.end").value("20:00"));
+    }
+
+    @Test
+    public void shouldDeleteSchoolByIdAndReturnJsonSchoolResponse() throws Exception {
+        given(schoolService.deleteSchoolById(anyLong())).willReturn(schoolResponse);
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete(BASE_URL + "/{school-id}", 1)
+                )
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("СРЕДНЯЯ ШКОЛА №3 г. Иваново"))
                 .andExpect(jsonPath("$.region").value("Брестская область"))

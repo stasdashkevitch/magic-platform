@@ -21,10 +21,14 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 
 @ExtendWith(MockitoExtension.class)
 class SchoolServiceTest {
+
+    private static final Long SCHOOL_ID = 1L;
 
     private static School school;
     private static SchoolResponse schoolResponse;
@@ -40,7 +44,7 @@ class SchoolServiceTest {
     @BeforeEach
     public void setUp() {
         school = School.builder()
-                .id(1L)
+                .id(SCHOOL_ID)
                 .name("СРЕДНЯЯ ШКОЛА №3 г. Иваново")
                 .location(
                         SchoolLocation.builder()
@@ -75,7 +79,7 @@ class SchoolServiceTest {
                 .build();
 
         schoolResponse = new SchoolResponse(
-                1L,
+                SCHOOL_ID,
                 "СРЕДНЯЯ ШКОЛА №3 г. Иваново",
                 "Брестская область",
                 "г. Иваново",
@@ -128,12 +132,12 @@ class SchoolServiceTest {
 
     @Test
     public void shouldReturnSchoolResponseById() {
-        given(schoolRepository.findById(1L)).willReturn(Optional.of(school));
+        given(schoolRepository.findById(anyLong())).willReturn(Optional.of(school));
         given(schoolMapper.schoolToSchoolResponse(school)).willReturn(
             schoolResponse
         );
 
-        var resultSchoolResponse = schoolService.getSchoolById(1L);
+        var resultSchoolResponse = schoolService.getSchoolById(anyLong());
 
         assertThat(schoolResponse).isNotNull();
         assertThat(resultSchoolResponse).isEqualTo(schoolResponse);
@@ -146,6 +150,18 @@ class SchoolServiceTest {
         given(schoolMapper.schoolToSchoolResponse(school)).willReturn(schoolResponse);
 
         var resultSchoolResponse = schoolService.createSchool(schoolRequest);
+
+        assertThat(resultSchoolResponse).isNotNull();
+        assertThat(resultSchoolResponse).isEqualTo(schoolResponse);
+    }
+
+    @Test
+    public void shouldDeleteSchoolByIdAndReturnSchoolResponse() {
+        given(schoolRepository.findById(anyLong())).willReturn(Optional.of(school));
+        doNothing().when(schoolRepository).deleteById(anyLong());
+        given(schoolMapper.schoolToSchoolResponse(school)).willReturn(schoolResponse);
+
+        var resultSchoolResponse = schoolService.deleteSchoolById(SCHOOL_ID);
 
         assertThat(resultSchoolResponse).isNotNull();
         assertThat(resultSchoolResponse).isEqualTo(schoolResponse);

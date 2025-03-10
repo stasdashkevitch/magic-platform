@@ -41,4 +41,13 @@ public class SchoolController {
         log.info("Delete school by id: {}", id);
         return ResponseEntity.ok(schoolService.deleteSchoolById(id));
     }
+
+    @PatchMapping("/{school-id}")
+    public ResponseEntity<SchoolResponse> updateSchoolById(
+            @PathVariable("school-id") Long id,
+            @RequestBody SchoolRequest schoolRequest
+    ) {
+        log.info("Update(patch) school by id: {}", id);
+        return ResponseEntity.ok(schoolService.updateSchoolById(id, schoolRequest));
+    }
 }

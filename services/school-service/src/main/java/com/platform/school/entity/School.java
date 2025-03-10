@@ -29,7 +29,7 @@ public class School {
     private Integer establishedYear;
     private Integer studentCapacity;
     private Integer studentCount;
-    private Integer teachersCount;
+    private Integer teacherCount;
     private Integer staffCount;
     private Integer classroomCount;
     @Column(columnDefinition = "jsonb")

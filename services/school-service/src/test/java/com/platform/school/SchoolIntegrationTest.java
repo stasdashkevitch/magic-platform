@@ -1,15 +1,24 @@
 package com.platform.school;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.platform.school.dto.SchoolRequest;
 import com.platform.school.dto.SchoolResponse;
 import com.platform.school.dto.TimeRangeDto;
+import com.platform.school.entity.School;
+import com.platform.school.entity.SchoolLocation;
+import com.platform.school.entity.TimeRange;
+import com.platform.school.repository.SchoolRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -17,14 +26,21 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
 public class SchoolIntegrationTest {
 
-    private static final Long SCHOOL_ID = 1L;
-
     private static SchoolRequest schoolRequest;
+    private static SchoolRequest updateSchoolRequest;
+    private static School school;
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private SchoolRepository schoolRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setUp() {
@@ -52,36 +68,92 @@ public class SchoolIntegrationTest {
                         LocalTime.of(20, 0)
                 )
         );
+
+       school = School.builder()
+               .name("СРЕДНЯЯ ШКОЛА №3 г. Иваново")
+               .location(
+                       SchoolLocation.builder()
+                               .id(1L)
+                               .region("Брестская область")
+                               .locality("г. Иваново")
+                               .build()
+               )
+               .address("ул. Советская, 26")
+               .phoneNumber("(01652) 9 50 82")
+               .email("sch3@ivanovo.edu.by")
+               .type("ГУО")
+               .establishedYear(1992)
+               .studentCount(1000)
+               .studentCount(9090)
+               .teacherCount(60)
+               .staffCount(90)
+               .classroomCount(60)
+               .facilities(List.of("Библиотека"))
+               .workTime(
+                       TimeRange.builder()
+                               .start(LocalTime.of(7, 0))
+                               .end(LocalTime.of(21, 0))
+                               .build()
+               )
+               .schoolHours(
+                       TimeRange.builder()
+                               .start(LocalTime.of(8, 0))
+                               .end(LocalTime.of(20, 0))
+                               .build()
+               )
+               .build();
+
+        updateSchoolRequest = new SchoolRequest(
+                null,
+                null,
+                null,
+                null,
+                "(01652) 9 50 83",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
     }
 
     @Test
-    public void shouldGetSchoolById() {
-        var response = restTemplate.getForEntity("api/v1/schools/" + SCHOOL_ID, SchoolResponse.class);
+    public void shouldReturnSchoolById() {
+        var savedSchool = schoolRepository.save(school);
+
+        var response = restTemplate.getForEntity("api/v1/schools/" + savedSchool.getId(), SchoolResponse.class);
 
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().name()).isEqualTo("СРЕДНЯЯ ШКОЛА №3 г. Иваново");
-        assertThat(response.getBody().address()).isEqualTo("ул. Советская, 26");
-        assertThat(response.getBody().region()).isEqualTo("Брестская область");
-        assertThat(response.getBody().locality()).isEqualTo("г. Иваново");
-        assertThat(response.getBody().phoneNumber()).isEqualTo("(01652) 9 50 82");
-        assertThat(response.getBody().email()).isEqualTo("sch3@ivanovo.edu.by");
-        assertThat(response.getBody().type()).isEqualTo("ГУО");
-        assertThat(response.getBody().establishedYear()).isEqualTo(1992);
-        assertThat(response.getBody().studentCapacity()).isEqualTo(1000);
-        assertThat(response.getBody().studentCount()).isEqualTo(990);
-        assertThat(response.getBody().teachersCount()).isEqualTo(60);
-        assertThat(response.getBody().staffCount()).isEqualTo(90);
-        assertThat(response.getBody().classroomCount()).isEqualTo(60);
-        assertThat(response.getBody().facilities().contains("Библиотека")).isEqualTo(true);
-        assertThat(response.getBody().workTime().start()).isEqualTo(LocalTime.of(7, 0));
-        assertThat(response.getBody().workTime().end()).isEqualTo(LocalTime.of(21, 0));
-        assertThat(response.getBody().schoolHours().start()).isEqualTo(LocalTime.of(8, 0));
-        assertThat(response.getBody().schoolHours().end()).isEqualTo(LocalTime.of(20, 0));
+        assertThat(response.getBody().id()).isEqualTo(savedSchool.getId());
+        assertThat(response.getBody().name()).isEqualTo(school.getName());
+        assertThat(response.getBody().region()).isEqualTo(school.getLocation().getRegion());
+        assertThat(response.getBody().locality()).isEqualTo(school.getLocation().getLocality());
+        assertThat(response.getBody().address()).isEqualTo(school.getAddress());
+        assertThat(response.getBody().phoneNumber()).isEqualTo(school.getPhoneNumber());
+        assertThat(response.getBody().email()).isEqualTo(school.getEmail());
+        assertThat(response.getBody().type()).isEqualTo(school.getType());
+        assertThat(response.getBody().establishedYear()).isEqualTo(school.getEstablishedYear());
+        assertThat(response.getBody().studentCapacity()).isEqualTo(school.getStudentCapacity());
+        assertThat(response.getBody().studentCount()).isEqualTo(school.getStudentCount());
+        assertThat(response.getBody().teacherCount()).isEqualTo(school.getTeacherCount());
+        assertThat(response.getBody().staffCount()).isEqualTo(school.getStaffCount());
+        assertThat(response.getBody().classroomCount()).isEqualTo(school.getClassroomCount());
+        assertThat(response.getBody().facilities().contains(school.getFacilities().get(0))).isEqualTo(true);
+        assertThat(response.getBody().workTime().start()).isEqualTo(school.getWorkTime().getStart());
+        assertThat(response.getBody().workTime().end()).isEqualTo(school.getWorkTime().getEnd());
+        assertThat(response.getBody().schoolHours().start()).isEqualTo(school.getSchoolHours().getStart());
+        assertThat(response.getBody().schoolHours().end()).isEqualTo(school.getSchoolHours().getEnd());
     }
 
     @Test
-    public void shouldCreateSchool() {
+    public void shouldCreateSchoolAndReturnNewSchool() {
         var response = restTemplate.postForEntity(
                 "api/v1/schools",
                 schoolRequest,
@@ -90,30 +162,33 @@ public class SchoolIntegrationTest {
 
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody().name()).isEqualTo("СРЕДНЯЯ ШКОЛА №3 г. Иваново");
-        assertThat(response.getBody().address()).isEqualTo("ул. Советская, 26");
-        assertThat(response.getBody().region()).isEqualTo("Брестская область");
-        assertThat(response.getBody().locality()).isEqualTo("г. Иваново");
-        assertThat(response.getBody().phoneNumber()).isEqualTo("(01652) 9 50 82");
-        assertThat(response.getBody().email()).isEqualTo("sch3@ivanovo.edu.by");
-        assertThat(response.getBody().type()).isEqualTo("ГУО");
-        assertThat(response.getBody().establishedYear()).isEqualTo(1992);
-        assertThat(response.getBody().studentCapacity()).isEqualTo(1000);
-        assertThat(response.getBody().studentCount()).isEqualTo(990);
-        assertThat(response.getBody().teachersCount()).isEqualTo(60);
-        assertThat(response.getBody().staffCount()).isEqualTo(90);
-        assertThat(response.getBody().classroomCount()).isEqualTo(60);
-        assertThat(response.getBody().facilities().contains("Библиотека")).isEqualTo(true);
-        assertThat(response.getBody().workTime().start()).isEqualTo(LocalTime.of(7, 0));
-        assertThat(response.getBody().workTime().end()).isEqualTo(LocalTime.of(21, 0));
-        assertThat(response.getBody().schoolHours().start()).isEqualTo(LocalTime.of(8, 0));
-        assertThat(response.getBody().schoolHours().end()).isEqualTo(LocalTime.of(20, 0));
+        assertThat(response.getBody().id()).isPositive();
+        assertThat(response.getBody().name()).isEqualTo(schoolRequest.name());
+        assertThat(response.getBody().address()).isEqualTo(schoolRequest.address());
+        assertThat(response.getBody().region()).isEqualTo(schoolRequest.region());
+        assertThat(response.getBody().locality()).isEqualTo(schoolRequest.locality());
+        assertThat(response.getBody().phoneNumber()).isEqualTo(schoolRequest.phoneNumber());
+        assertThat(response.getBody().email()).isEqualTo(schoolRequest.email());
+        assertThat(response.getBody().type()).isEqualTo(schoolRequest.type());
+        assertThat(response.getBody().establishedYear()).isEqualTo(schoolRequest.establishedYear());
+        assertThat(response.getBody().studentCapacity()).isEqualTo(schoolRequest.studentCapacity());
+        assertThat(response.getBody().studentCount()).isEqualTo(schoolRequest.studentCount());
+        assertThat(response.getBody().teacherCount()).isEqualTo(schoolRequest.teacherCount());
+        assertThat(response.getBody().staffCount()).isEqualTo(schoolRequest.staffCount());
+        assertThat(response.getBody().classroomCount()).isEqualTo(schoolRequest.classroomCount());
+        assertThat(response.getBody().facilities().contains(schoolRequest.facilities().get(0))).isEqualTo(true);
+        assertThat(response.getBody().workTime().start()).isEqualTo(schoolRequest.workTime().start());
+        assertThat(response.getBody().workTime().end()).isEqualTo(schoolRequest.workTime().end());
+        assertThat(response.getBody().schoolHours().start()).isEqualTo(schoolRequest.schoolHours().start());
+        assertThat(response.getBody().schoolHours().end()).isEqualTo(schoolRequest.schoolHours().end());
     }
 
     @Test
-    public void shouldDeleteSchoolById() {
+    public void shouldDeleteSchoolByIdAndReturnDeletedSchool() {
+        var savedSchool = schoolRepository.save(school);
+
         var response = restTemplate.exchange(
-                "api/v1/schools/" + SCHOOL_ID,
+                "api/v1/schools/" + savedSchool.getId(),
                 HttpMethod.DELETE,
                 null,
                 SchoolResponse.class
@@ -121,23 +196,62 @@ public class SchoolIntegrationTest {
 
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().name()).isEqualTo("СРЕДНЯЯ ШКОЛА №3 г. Иваново");
-        assertThat(response.getBody().address()).isEqualTo("ул. Советская, 26");
-        assertThat(response.getBody().region()).isEqualTo("Брестская область");
-        assertThat(response.getBody().locality()).isEqualTo("г. Иваново");
-        assertThat(response.getBody().phoneNumber()).isEqualTo("(01652) 9 50 82");
-        assertThat(response.getBody().email()).isEqualTo("sch3@ivanovo.edu.by");
-        assertThat(response.getBody().type()).isEqualTo("ГУО");
-        assertThat(response.getBody().establishedYear()).isEqualTo(1992);
-        assertThat(response.getBody().studentCapacity()).isEqualTo(1000);
-        assertThat(response.getBody().studentCount()).isEqualTo(990);
-        assertThat(response.getBody().teachersCount()).isEqualTo(60);
-        assertThat(response.getBody().staffCount()).isEqualTo(90);
-        assertThat(response.getBody().classroomCount()).isEqualTo(60);
-        assertThat(response.getBody().facilities().contains("Библиотека")).isEqualTo(true);
-        assertThat(response.getBody().workTime().start()).isEqualTo(LocalTime.of(7, 0));
-        assertThat(response.getBody().workTime().end()).isEqualTo(LocalTime.of(21, 0));
-        assertThat(response.getBody().schoolHours().start()).isEqualTo(LocalTime.of(8, 0));
-        assertThat(response.getBody().schoolHours().end()).isEqualTo(LocalTime.of(20, 0));
+        assertThat(response.getBody().id()).isEqualTo(savedSchool.getId());
+        assertThat(response.getBody().name()).isEqualTo(school.getName());
+        assertThat(response.getBody().region()).isEqualTo(school.getLocation().getRegion());
+        assertThat(response.getBody().locality()).isEqualTo(school.getLocation().getLocality());
+        assertThat(response.getBody().address()).isEqualTo(school.getAddress());
+        assertThat(response.getBody().phoneNumber()).isEqualTo(school.getPhoneNumber());
+        assertThat(response.getBody().email()).isEqualTo(school.getEmail());
+        assertThat(response.getBody().type()).isEqualTo(school.getType());
+        assertThat(response.getBody().establishedYear()).isEqualTo(school.getEstablishedYear());
+        assertThat(response.getBody().studentCapacity()).isEqualTo(school.getStudentCapacity());
+        assertThat(response.getBody().studentCount()).isEqualTo(school.getStudentCount());
+        assertThat(response.getBody().teacherCount()).isEqualTo(school.getTeacherCount());
+        assertThat(response.getBody().staffCount()).isEqualTo(school.getStaffCount());
+        assertThat(response.getBody().classroomCount()).isEqualTo(school.getClassroomCount());
+        assertThat(response.getBody().facilities().contains(school.getFacilities().get(0))).isEqualTo(true);
+        assertThat(response.getBody().workTime().start()).isEqualTo(school.getWorkTime().getStart());
+        assertThat(response.getBody().workTime().end()).isEqualTo(school.getWorkTime().getEnd());
+        assertThat(response.getBody().schoolHours().start()).isEqualTo(school.getSchoolHours().getStart());
+        assertThat(response.getBody().schoolHours().end()).isEqualTo(school.getSchoolHours().getEnd());
+    }
+
+    @Test
+    public void shouldUpdateSchoolAndReturnUpdatedSchoolResponse() throws JsonProcessingException {
+        var savedSchool = schoolRepository.save(school);
+        var patchRequestJson = objectMapper.writeValueAsString(updateSchoolRequest);
+        var requestEntity = new HttpEntity<>(patchRequestJson);
+
+        ResponseEntity<SchoolResponse> response = restTemplate.exchange(
+                "/api/v1/schools/" + savedSchool.getId(),
+                HttpMethod.PATCH,
+                requestEntity,
+                SchoolResponse.class
+        );
+
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().id()).isEqualTo(savedSchool.getId());
+        // updated value
+        assertThat(response.getBody().phoneNumber()).isEqualTo(updateSchoolRequest.phoneNumber());
+        // old values
+        assertThat(response.getBody().name()).isEqualTo(school.getName());
+        assertThat(response.getBody().region()).isEqualTo(school.getLocation().getRegion());
+        assertThat(response.getBody().locality()).isEqualTo(school.getLocation().getLocality());
+        assertThat(response.getBody().address()).isEqualTo(school.getAddress());
+        assertThat(response.getBody().email()).isEqualTo(school.getEmail());
+        assertThat(response.getBody().type()).isEqualTo(school.getType());
+        assertThat(response.getBody().establishedYear()).isEqualTo(school.getEstablishedYear());
+        assertThat(response.getBody().studentCapacity()).isEqualTo(school.getStudentCapacity());
+        assertThat(response.getBody().studentCount()).isEqualTo(school.getStudentCount());
+        assertThat(response.getBody().teacherCount()).isEqualTo(school.getTeacherCount());
+        assertThat(response.getBody().staffCount()).isEqualTo(school.getStaffCount());
+        assertThat(response.getBody().classroomCount()).isEqualTo(school.getClassroomCount());
+        assertThat(response.getBody().facilities().contains(school.getFacilities().get(0))).isEqualTo(true);
+        assertThat(response.getBody().workTime().start()).isEqualTo(school.getWorkTime().getStart());
+        assertThat(response.getBody().workTime().end()).isEqualTo(school.getWorkTime().getEnd());
+        assertThat(response.getBody().schoolHours().start()).isEqualTo(school.getSchoolHours().getStart());
+        assertThat(response.getBody().schoolHours().end()).isEqualTo(school.getSchoolHours().getEnd());
     }
 }

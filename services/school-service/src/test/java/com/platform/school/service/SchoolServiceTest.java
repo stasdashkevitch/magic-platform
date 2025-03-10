@@ -21,9 +21,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class SchoolServiceTest {
@@ -33,6 +35,8 @@ class SchoolServiceTest {
     private static School school;
     private static SchoolResponse schoolResponse;
     private static SchoolRequest schoolRequest;
+    private static SchoolRequest updateSchoolRequest;
+    private static SchoolResponse updatedSchoolResponse;
 
     @Mock
     private SchoolRepository schoolRepository;
@@ -60,7 +64,7 @@ class SchoolServiceTest {
                 .establishedYear(1992)
                 .studentCount(1000)
                 .studentCount(9090)
-                .teachersCount(60)
+                .teacherCount(60)
                 .staffCount(90)
                 .classroomCount(60)
                 .facilities(List.of("Библиотека"))
@@ -128,42 +132,112 @@ class SchoolServiceTest {
                         LocalTime.of(20, 0)
                 )
         );
+
+        updateSchoolRequest = new SchoolRequest(
+                null,
+                null,
+                null,
+                null,
+                "(01652) 9 50 83",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        updatedSchoolResponse = new SchoolResponse(
+                1L,
+                "СРЕДНЯЯ ШКОЛА №3 г. Иваново",
+                "Брестская область",
+                "г. Иваново",
+                "ул. Советская, 26",
+                updateSchoolRequest.phoneNumber(),
+                "sch3@ivanovo.edu.by",
+                "ГУО",
+                1992,
+                1000,
+                9090,
+                60,
+                90,
+                60,
+                List.of("Библиотека"),
+                new TimeRangeDto(
+                        LocalTime.of(7, 0),
+                        LocalTime.of(21, 0)
+                ),
+                new TimeRangeDto(
+                        LocalTime.of(8, 0),
+                        LocalTime.of(20, 0)
+                )
+        );
     }
 
     @Test
     public void shouldReturnSchoolResponseById() {
         given(schoolRepository.findById(anyLong())).willReturn(Optional.of(school));
-        given(schoolMapper.schoolToSchoolResponse(school)).willReturn(
-            schoolResponse
-        );
+        given(schoolMapper.schoolToSchoolResponse(any(School.class))).willReturn(schoolResponse);
 
         var resultSchoolResponse = schoolService.getSchoolById(anyLong());
 
         assertThat(schoolResponse).isNotNull();
         assertThat(resultSchoolResponse).isEqualTo(schoolResponse);
+
+        verify(schoolRepository).findById(anyLong());
+        verify(schoolMapper).schoolToSchoolResponse(any(School.class));
     }
 
     @Test
     public void shouldCreateSchoolAndReturnSchoolResponse() {
-        given(schoolMapper.schoolRequestToSchool(schoolRequest)).willReturn(school);
-        given(schoolRepository.save(school)).willReturn(school);
-        given(schoolMapper.schoolToSchoolResponse(school)).willReturn(schoolResponse);
+        given(schoolMapper.schoolRequestToSchool(any(SchoolRequest.class))).willReturn(school);
+        given(schoolRepository.save(any(School.class))).willReturn(school);
+        given(schoolMapper.schoolToSchoolResponse(any(School.class))).willReturn(schoolResponse);
 
         var resultSchoolResponse = schoolService.createSchool(schoolRequest);
 
         assertThat(resultSchoolResponse).isNotNull();
         assertThat(resultSchoolResponse).isEqualTo(schoolResponse);
+
+        verify(schoolMapper).schoolRequestToSchool(any(SchoolRequest.class));
+        verify(schoolRepository).save(any(School.class));
+        verify(schoolMapper).schoolToSchoolResponse(any(School.class));
     }
 
     @Test
     public void shouldDeleteSchoolByIdAndReturnSchoolResponse() {
         given(schoolRepository.findById(anyLong())).willReturn(Optional.of(school));
         doNothing().when(schoolRepository).deleteById(anyLong());
-        given(schoolMapper.schoolToSchoolResponse(school)).willReturn(schoolResponse);
+        given(schoolMapper.schoolToSchoolResponse(any(School.class))).willReturn(schoolResponse);
 
         var resultSchoolResponse = schoolService.deleteSchoolById(SCHOOL_ID);
 
         assertThat(resultSchoolResponse).isNotNull();
         assertThat(resultSchoolResponse).isEqualTo(schoolResponse);
+
+        verify(schoolRepository).findById(anyLong());
+        verify(schoolRepository).deleteById(anyLong());
+        verify(schoolMapper).schoolToSchoolResponse(any(School.class));
+    }
+
+    @Test
+    public void shouldUpdateSchoolByIdAndReturnUpdatedResponse() {
+        given(schoolRepository.findById(anyLong())).willReturn(Optional.of(school));
+        given(schoolRepository.save(any(School.class))).willReturn(school);
+    given(schoolMapper.schoolToSchoolResponse(any(School.class))).willReturn(updatedSchoolResponse);
+
+        var resultSchoolResponse = schoolService.updateSchoolById(SCHOOL_ID, updateSchoolRequest);
+
+        assertThat(resultSchoolResponse).isNotNull();
+        assertThat(resultSchoolResponse).isEqualTo(updatedSchoolResponse);
+
+        verify(schoolRepository).findById(anyLong());
+        verify(schoolRepository).save(any(School.class));
+        verify(schoolMapper).schoolToSchoolResponse(any(School.class));
     }
 }

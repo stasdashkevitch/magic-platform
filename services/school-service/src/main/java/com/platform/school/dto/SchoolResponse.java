@@ -14,7 +14,7 @@ public record SchoolResponse(
         Integer establishedYear,
         Integer studentCapacity,
         Integer studentCount,
-        Integer teachersCount,
+        Integer teacherCount,
         Integer staffCount,
         Integer classroomCount,
         List<String> facilities,

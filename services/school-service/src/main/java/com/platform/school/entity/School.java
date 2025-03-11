@@ -36,7 +36,15 @@ public class School {
     @Convert(converter = FacilitiesConverter.class)
     private List<String> facilities;
     @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "start", column = @Column(name = "work_start_time")),
+            @AttributeOverride(name = "end", column = @Column(name = "work_end_time"))
+    })
     private TimeRange workTime;
     @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "start", column = @Column(name = "school_start_time")),
+            @AttributeOverride(name = "end", column = @Column(name = "school_end_time"))
+})
     private TimeRange schoolHours;
 }

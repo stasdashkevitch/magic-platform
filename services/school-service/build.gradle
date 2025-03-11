@@ -2,7 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
-
+	id 'com.ewerk.gradle.plugins.querydsl' version "1.0.10"
 }
 
 group = 'com.platform'
@@ -15,9 +15,7 @@ java {
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+	querydsl.extendsFrom implementation, compileOnly, runtimeOnly
 }
 
 repositories {
@@ -29,6 +27,7 @@ ext {
 }
 
 dependencies {
+
 	implementation 'org.mapstruct:mapstruct:1.6.3'
 	implementation 'org.mapstruct:mapstruct-processor:1.6.3'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
@@ -45,6 +44,20 @@ dependencies {
 	testImplementation 'org.testcontainers:junit-jupiter'
 	testImplementation 'org.testcontainers:postgresql'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor 'com.querydsl:querydsl-apt'
+}
+
+querydsl {
+	jpa = true
+	library = 'com.querydsl:querydsl-apt:5.0.0:jakarta'
+	querydslSourcesDir = "$buildDir/generated/sources/annotationProcessor/java/main"
+}
+
+initQuerydslSourcesDir.dependsOn clean
+
+compileQuerydsl {
+	options.annotationProcessorPath = configurations.querydsl
 }
 
 dependencyManagement {

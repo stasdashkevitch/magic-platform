@@ -1,17 +1,20 @@
 package com.platform.school.service;
 
-import com.platform.school.dto.SchoolRequest;
-import com.platform.school.dto.SchoolResponse;
+import com.platform.school.dto.*;
 import com.platform.school.exception.SchoolNotFoundException;
 import com.platform.school.mapper.SchoolMapper;
 import com.platform.school.repository.SchoolRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static com.platform.school.entity.QSchool.school;
 
 @Slf4j
 @Service
@@ -116,4 +119,36 @@ public class SchoolService {
             newValueConsumer.accept(newValue);
         }
     }
+
+    public PageResponse<SchoolResponse> findAll(SchoolFilter schoolFilter, Pageable pageable) {
+        log.info("Finding all schools by filter: {}", schoolFilter);
+
+        var predicate = QPredicates.builder()
+                .add(schoolFilter.name(), school.name::containsIgnoreCase)
+                .add(schoolFilter.region(), school.location.region::containsIgnoreCase)
+                .add(schoolFilter.locality(), school.location.locality::containsIgnoreCase)
+                .add(schoolFilter.studentCapacityMin(), school.studentCapacity::goe)
+                .add(schoolFilter.studentCapacityMax(), school.studentCapacity::loe)
+                .add(schoolFilter.studentCountMin(), school.studentCount::goe)
+                .add(schoolFilter.studentCountMax(), school.studentCount::loe)
+                .add(schoolFilter.teacherCountMin(), school.teacherCount::goe)
+                .add(schoolFilter.teacherCountMax(), school.teacherCount::loe)
+                .add(schoolFilter.staffCountMin(), school.staffCount::goe)
+                .add(schoolFilter.staffCountMax(), school.staffCount::loe)
+                .add(schoolFilter.classroomCountMin(), school.classroomCount::goe)
+                .add(schoolFilter.classroomCountMax(), school.classroomCount::loe)
+                .add(schoolFilter.facilities(), value -> school.facilities.any().in(value))
+                .add(schoolFilter.workTime() != null ? schoolFilter.workTime().start() : null, school.workTime.start::eq)
+                .add(schoolFilter.workTime() != null ? schoolFilter.workTime().end() : null, school.workTime.end::eq)
+                .add(schoolFilter.schoolHours() != null ? schoolFilter.schoolHours().start() : null, school.schoolHours.start::eq)
+                .add(schoolFilter.schoolHours() != null ? schoolFilter.schoolHours().end() : null, school.schoolHours.end::eq)
+                .build();
+
+        Page<SchoolResponse> schoolResponsePage = schoolRepository.findAll(predicate, pageable)
+                .map(schoolMapper::schoolToSchoolResponse);
+
+        log.info("Successfully found {} schools", schoolResponsePage.getTotalElements());
+        return PageResponse.of(schoolResponsePage);
+    }
+
 }

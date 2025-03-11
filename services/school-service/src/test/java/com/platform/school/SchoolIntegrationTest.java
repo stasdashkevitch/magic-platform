@@ -32,6 +32,8 @@ public class SchoolIntegrationTest {
     private static SchoolRequest schoolRequest;
     private static SchoolRequest updateSchoolRequest;
     private static School school;
+    private static School secondSchool;
+    private static School thirdSchool;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -102,6 +104,74 @@ public class SchoolIntegrationTest {
                                .build()
                )
                .build();
+
+        secondSchool = School.builder()
+                .name("СРЕДНЯЯ ШКОЛА №12 г. Брест")
+                .location(
+                        SchoolLocation.builder()
+                                .id(1L)
+                                .region("Брестская область")
+                                .locality("г. Брест")
+                                .build()
+                )
+                .address("ул. Советская, 26")
+                .phoneNumber("(01652) 9 51 81")
+                .email("sch12@ivanovo.edu.by")
+                .type("ГУО")
+                .establishedYear(1900)
+                .studentCount(2000)
+                .studentCount(1900)
+                .teacherCount(120)
+                .staffCount(160)
+                .classroomCount(100)
+                .facilities(List.of("Библиотека", "Столовая"))
+                .workTime(
+                        TimeRange.builder()
+                                .start(LocalTime.of(7, 0))
+                                .end(LocalTime.of(21, 0))
+                                .build()
+                )
+                .schoolHours(
+                        TimeRange.builder()
+                                .start(LocalTime.of(8, 0))
+                                .end(LocalTime.of(20, 0))
+                                .build()
+                )
+                .build();
+
+        thirdSchool = School.builder()
+                .name("СРЕДНЯЯ ШКОЛА №1 г. Минск")
+                .location(
+                        SchoolLocation.builder()
+                                .id(1L)
+                                .region("Минская область")
+                                .locality("г. Минск")
+                                .build()
+                )
+                .address("ул. Советская, 26")
+                .phoneNumber("(01652) 9 51 81")
+                .email("sch1@ivanovo.edu.by")
+                .type("ГУО")
+                .establishedYear(1890)
+                .studentCount(3000)
+                .studentCount(2500)
+                .teacherCount(120)
+                .staffCount(190)
+                .classroomCount(160)
+                .facilities(List.of("Библиотека"))
+                .workTime(
+                        TimeRange.builder()
+                                .start(LocalTime.of(7, 0))
+                                .end(LocalTime.of(21, 0))
+                                .build()
+                )
+                .schoolHours(
+                        TimeRange.builder()
+                                .start(LocalTime.of(8, 0))
+                                .end(LocalTime.of(20, 0))
+                                .build()
+                )
+                .build();
 
         updateSchoolRequest = new SchoolRequest(
                 null,
@@ -253,5 +323,13 @@ public class SchoolIntegrationTest {
         assertThat(response.getBody().workTime().end()).isEqualTo(school.getWorkTime().getEnd());
         assertThat(response.getBody().schoolHours().start()).isEqualTo(school.getSchoolHours().getStart());
         assertThat(response.getBody().schoolHours().end()).isEqualTo(school.getSchoolHours().getEnd());
+    }
+
+    @Test
+    public void shouldReturnPagedAndFilteredResult() {
+        schoolRepository.save(school);
+        schoolRepository.save(secondSchool);
+        schoolRepository.save(thirdSchool);
+
     }
 }

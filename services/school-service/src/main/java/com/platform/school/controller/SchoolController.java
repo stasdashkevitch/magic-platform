@@ -1,14 +1,17 @@
 package com.platform.school.controller;
 
-import com.platform.school.dto.SchoolRequest;
-import com.platform.school.dto.SchoolResponse;
+import com.platform.school.dto.*;
 import com.platform.school.service.SchoolService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalTime;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -49,5 +52,49 @@ public class SchoolController {
     ) {
         log.info("Update(patch) school by id: {}", id);
         return ResponseEntity.ok(schoolService.updateSchoolById(id, schoolRequest));
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResponse<SchoolResponse>> getAllSchools(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) String locality,
+            @RequestParam(required = false) Integer studentCapacityMin,
+            @RequestParam(required = false) Integer studentCapacityMax,
+            @RequestParam(required = false) Integer studentCountMin,
+            @RequestParam(required = false) Integer studentCountMax,
+            @RequestParam(required = false) Integer teacherCountMin,
+            @RequestParam(required = false) Integer teacherCountMax,
+            @RequestParam(required = false) Integer staffCountMin,
+            @RequestParam(required = false) Integer staffCountMax,
+            @RequestParam(required = false) Integer classroomCountMin,
+            @RequestParam(required = false) Integer classroomCountMax,
+            @RequestParam(required = false) List<String> facilities,
+            @RequestParam(required = false) LocalTime workTimeStart,
+            @RequestParam(required = false) LocalTime workTimeEnd,
+            @RequestParam(required = false) LocalTime schoolHoursStart,
+            @RequestParam(required = false) LocalTime schoolHoursEnd,
+            Pageable pageable
+    ) {
+        SchoolFilter schoolFilter = new SchoolFilter(
+                name,
+                region,
+                locality,
+                studentCapacityMin,
+                studentCapacityMax,
+                studentCountMin,
+                studentCountMax,
+                teacherCountMin,
+                teacherCountMax,
+                staffCountMin,
+                staffCountMax,
+                classroomCountMin,
+                classroomCountMax,
+                facilities,
+                new TimeRangeDto(workTimeStart, workTimeEnd),
+                new TimeRangeDto(schoolHoursStart, schoolHoursEnd)
+        );
+
+        return ResponseEntity.ok(schoolService.findAll(schoolFilter, pageable));
     }
 }

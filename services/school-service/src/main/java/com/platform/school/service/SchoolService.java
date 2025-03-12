@@ -150,5 +150,4 @@ public class SchoolService {
         log.info("Successfully found {} schools", schoolResponsePage.getTotalElements());
         return PageResponse.of(schoolResponsePage);
     }
-
 }
